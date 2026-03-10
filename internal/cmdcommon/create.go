@@ -37,6 +37,7 @@ type CreateParams struct {
 	AffectsVersions  []string
 	OriginalEstimate string
 	CustomFields     map[string]string
+	ADFFields        map[string]string
 	Template         string
 	NoInput          bool
 	Debug            bool
@@ -66,6 +67,7 @@ And, this field is mandatory when creating a sub-task.`)
 	cmd.Flags().StringArray("affects-version", []string{}, "Release info (affectsVersions)")
 	cmd.Flags().StringP("original-estimate", "e", "", prefix+" Original estimate")
 	cmd.Flags().StringToString("custom", custom, "Set custom fields")
+	cmd.Flags().StringToString("adf-field", make(map[string]string), "Set rich-text (ADF) custom fields by field ID (value is @filepath or inline markdown)")
 	cmd.Flags().StringP("template", "T", "", "Path to a file to read body/description from")
 	cmd.Flags().Bool("web", false, "Open in web browser after successful creation")
 	cmd.Flags().Bool("no-input", false, "Disable prompt for non-required fields")
