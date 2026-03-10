@@ -1,0 +1,66 @@
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+name: Release
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+          - goos: darwin
+            goarch: arm64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '^1.25.6'
+
+      - name: Build
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: '0'
+          GH_REF_NAME: ${{ github.ref_name }}
+          GH_SHA: ${{ github.sha }}
+        run: |
+          VERSION="${GH_REF_NAME:-dev}"
+          GIT_COMMIT="${GH_SHA}"
+          SOURCE_DATE_EPOCH="$(git show -s --format='%ct' HEAD)"
+          VERSION_PKG="github.com/ankitpokhrel/jira-cli/internal/version"
+          LDFLAGS="-s -w -X ${VERSION_PKG}.Version=${VERSION} -X ${VERSION_PKG}.GitCommit=${GIT_COMMIT} -X ${VERSION_PKG}.SourceDateEpoch=${SOURCE_DATE_EPOCH}"
+          go build -ldflags="${LDFLAGS}" -o jira-${GOOS}-${GOARCH} ./cmd/jira
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: jira-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: jira-${{ matrix.goos }}-${{ matrix.goarch }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          files: |
+            jira-linux-amd64/jira-linux-amd64
+            jira-darwin-arm64/jira-darwin-arm64
