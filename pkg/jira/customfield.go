@@ -39,3 +39,11 @@ type customFieldTypeProject struct {
 type customFieldTypeProjectSet struct {
 	Set customFieldTypeProject `json:"set"`
 }
+
+// customFieldTypeRichText holds a Jira-flavored markdown string
+// that the API v2 auto-converts to ADF for rich text fields.
+type customFieldTypeRichText string
+
+type customFieldTypeRichTextSet struct {
+	Set customFieldTypeRichText `json:"set"`
+}

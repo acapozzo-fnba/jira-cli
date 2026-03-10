@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 
@@ -45,6 +46,11 @@ type CreateRequest struct {
 	// CustomFields holds all custom fields passed
 	// while creating an issue.
 	CustomFields map[string]string
+	// ADFFields holds rich-text custom fields keyed by field ID.
+	// Values prefixed with @ are read from file; otherwise treated as inline markdown.
+	// Content is converted via md.ToJiraMD() and sent as a string to the API v2
+	// which auto-converts to ADF.
+	ADFFields map[string]string
 
 	projectType            string
 	installationType       string
@@ -223,8 +229,31 @@ func (*Client) getRequestData(req *CreateRequest) *createRequest {
 	}
 
 	constructCustomFields(req.CustomFields, req.configuredCustomFields, &data)
+	processADFFieldsForCreate(req.ADFFields, &data)
 
 	return &data
+}
+
+func processADFFieldsForCreate(fields map[string]string, data *createRequest) {
+	if len(fields) == 0 {
+		return
+	}
+
+	if data.Fields.M.customFields == nil {
+		data.Fields.M.customFields = make(customField)
+	}
+
+	for fieldID, val := range fields {
+		content := val
+		if strings.HasPrefix(val, "@") {
+			fileContent, err := os.ReadFile(strings.TrimPrefix(val, "@"))
+			if err != nil {
+				continue
+			}
+			content = string(fileContent)
+		}
+		data.Fields.M.customFields[fieldID] = md.ToJiraMD(content)
+	}
 }
 
 func constructCustomFields(fields map[string]string, configuredFields []IssueTypeField, data *createRequest) {

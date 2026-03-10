@@ -110,6 +110,7 @@ func create(cmd *cobra.Command, _ []string) {
 			FixVersions:     params.FixVersions,
 			AffectsVersions: params.AffectsVersions,
 			CustomFields:    params.CustomFields,
+			ADFFields:       params.ADFFields,
 			EpicField:       viper.GetString("epic.name"),
 		}
 		if projectType != jira.ProjectTypeNextGen {
@@ -238,6 +239,9 @@ func parseFlags(flags query.FlagParser) *cmdcommon.CreateParams {
 	custom, err := flags.GetStringToString("custom")
 	cmdutil.ExitIfError(err)
 
+	adfFields, err := flags.GetStringToString("adf-field")
+	cmdutil.ExitIfError(err)
+
 	template, err := flags.GetString("template")
 	cmdutil.ExitIfError(err)
 
@@ -259,6 +263,7 @@ func parseFlags(flags query.FlagParser) *cmdcommon.CreateParams {
 		FixVersions:     fixVersions,
 		AffectsVersions: affectsVersions,
 		CustomFields:    custom,
+		ADFFields:       adfFields,
 		Template:        template,
 		NoInput:         noInput,
 		Debug:           debug,

@@ -123,6 +123,7 @@ func create(cmd *cobra.Command, _ []string) {
 			AffectsVersions:  params.AffectsVersions,
 			OriginalEstimate: params.OriginalEstimate,
 			CustomFields:     params.CustomFields,
+			ADFFields:        params.ADFFields,
 			EpicField:        viper.GetString("epic.link"),
 		}
 		cr.ForProjectType(projectType)
@@ -370,6 +371,9 @@ func parseFlags(flags query.FlagParser) *cmdcommon.CreateParams {
 	custom, err := flags.GetStringToString("custom")
 	cmdutil.ExitIfError(err)
 
+	adfFields, err := flags.GetStringToString("adf-field")
+	cmdutil.ExitIfError(err)
+
 	template, err := flags.GetString("template")
 	cmdutil.ExitIfError(err)
 
@@ -393,6 +397,7 @@ func parseFlags(flags query.FlagParser) *cmdcommon.CreateParams {
 		AffectsVersions:  affectsVersions,
 		OriginalEstimate: originalEstimate,
 		CustomFields:     custom,
+		ADFFields:        adfFields,
 		Template:         template,
 		NoInput:          noInput,
 		Debug:            debug,

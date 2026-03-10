@@ -5,9 +5,12 @@ import (
 	"encoding/json"
 	"maps"
 	"net/http"
+	"os"
 	"slices"
 	"strconv"
 	"strings"
+
+	"github.com/ankitpokhrel/jira-cli/pkg/md"
 )
 
 const separatorMinus = "-"
@@ -33,7 +36,12 @@ type EditRequest struct {
 	// CustomFields holds all custom fields passed
 	// while editing the issue.
 	CustomFields map[string]string
-	SkipNotify   bool
+	// ADFFields holds rich-text custom fields keyed by field ID.
+	// Values prefixed with @ are read from file; otherwise treated as inline markdown.
+	// Content is converted via md.ToJiraMD() and sent as a string to the API v2
+	// which auto-converts to ADF.
+	ADFFields  map[string]string
+	SkipNotify bool
 
 	configuredCustomFields []IssueTypeField
 }
@@ -354,8 +362,32 @@ func getRequestDataForEdit(req *EditRequest) *editRequest {
 		Fields: fields,
 	}
 	constructCustomFieldsForEdit(req.CustomFields, req.configuredCustomFields, &data)
+	processADFFieldsForEdit(req.ADFFields, &data)
 
 	return &data
+}
+
+func processADFFieldsForEdit(fields map[string]string, data *editRequest) {
+	if len(fields) == 0 {
+		return
+	}
+
+	if data.Update.M.customFields == nil {
+		data.Update.M.customFields = make(customField)
+	}
+
+	for fieldID, val := range fields {
+		content := val
+		if strings.HasPrefix(val, "@") {
+			fileContent, err := os.ReadFile(strings.TrimPrefix(val, "@"))
+			if err != nil {
+				continue
+			}
+			content = string(fileContent)
+		}
+		converted := customFieldTypeRichText(md.ToJiraMD(content))
+		data.Update.M.customFields[fieldID] = []customFieldTypeRichTextSet{{Set: converted}}
+	}
 }
 
 func constructCustomFieldsForEdit(fields map[string]string, configuredFields []IssueTypeField, data *editRequest) {
