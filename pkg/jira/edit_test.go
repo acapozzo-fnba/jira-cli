@@ -51,7 +51,7 @@ func TestEditWithADFCustomField(t *testing.T) {
 func TestEditWithADFCustomFieldFromFile(t *testing.T) {
 	tmpDir := t.TempDir()
 	mdFile := filepath.Join(tmpDir, "spec.md")
-	err := os.WriteFile(mdFile, []byte("**Bold text**"), 0644)
+	err := os.WriteFile(mdFile, []byte("**Bold text**"), 0o644)
 	assert.NoError(t, err)
 
 	expectedBody := `{"update":{"customfield_10042":[{"set":"*Bold text*"}]},"fields":{"parent":{}}}`

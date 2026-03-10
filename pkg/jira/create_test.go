@@ -214,7 +214,7 @@ func TestCreateWithADFCustomFieldFromFile(t *testing.T) {
 	// Write markdown to a temp file and verify the @filepath syntax reads and converts it.
 	tmpDir := t.TempDir()
 	mdFile := filepath.Join(tmpDir, "spec.md")
-	err := os.WriteFile(mdFile, []byte("**Bold text**"), 0644)
+	err := os.WriteFile(mdFile, []byte("**Bold text**"), 0o644)
 	assert.NoError(t, err)
 
 	expectedBody := `{"update":{},"fields":{"project":{"key":"TEST"},"issuetype":{"name":"Task"},` +
