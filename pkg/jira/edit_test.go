@@ -33,7 +33,7 @@ func (e *editTestServer) serve(t *testing.T, expectedBody string) *httptest.Serv
 
 func TestEditWithADFCustomField(t *testing.T) {
 	// ADF fields in edit are wrapped in set operations: [{"set": "converted markdown"}]
-	expectedBody := `{"update":{"customfield_10042":[{"set":"*Bold text*"}]},"fields":{"parent":{}}}`
+	expectedBody := `{"update":{"customfield_10042":[{"set":"*Bold text*\n\n"}]},"fields":{"parent":{}}}`
 	testServer := editTestServer{code: 204}
 	server := testServer.serve(t, expectedBody)
 	defer server.Close()
@@ -54,7 +54,7 @@ func TestEditWithADFCustomFieldFromFile(t *testing.T) {
 	err := os.WriteFile(mdFile, []byte("**Bold text**"), 0o644)
 	assert.NoError(t, err)
 
-	expectedBody := `{"update":{"customfield_10042":[{"set":"*Bold text*"}]},"fields":{"parent":{}}}`
+	expectedBody := `{"update":{"customfield_10042":[{"set":"*Bold text*\n\n"}]},"fields":{"parent":{}}}`
 	testServer := editTestServer{code: 204}
 	server := testServer.serve(t, expectedBody)
 	defer server.Close()
@@ -70,7 +70,7 @@ func TestEditWithADFCustomFieldFromFile(t *testing.T) {
 }
 
 func TestEditWithSummaryAndADFField(t *testing.T) {
-	expectedBody := `{"update":{"summary":[{"set":"New title"}],"customfield_10042":[{"set":"*Bold text*"}]},"fields":{"parent":{}}}`
+	expectedBody := `{"update":{"summary":[{"set":"New title"}],"customfield_10042":[{"set":"*Bold text*\n\n"}]},"fields":{"parent":{}}}`
 	testServer := editTestServer{code: 204}
 	server := testServer.serve(t, expectedBody)
 	defer server.Close()

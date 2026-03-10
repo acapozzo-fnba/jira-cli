@@ -185,7 +185,7 @@ func TestCreateWithADFCustomField(t *testing.T) {
 	// md.ToJiraMD("## Summary\n- Item one") produces Jira wiki markup.
 	// The exact output depends on the markdown-to-jira converter, so we use a simple input.
 	expectedBody := `{"update":{},"fields":{"project":{"key":"TEST"},"issuetype":{"name":"Task"},` +
-		`"summary":"Test with ADF","customfield_10042":"*Bold text*"}}`
+		`"summary":"Test with ADF","customfield_10042":"*Bold text*\n\n"}}`
 	testServer := createTestServer{code: 201}
 	server := testServer.serve(t, expectedBody)
 	defer server.Close()
@@ -218,7 +218,7 @@ func TestCreateWithADFCustomFieldFromFile(t *testing.T) {
 	assert.NoError(t, err)
 
 	expectedBody := `{"update":{},"fields":{"project":{"key":"TEST"},"issuetype":{"name":"Task"},` +
-		`"summary":"Test ADF from file","customfield_10042":"*Bold text*"}}`
+		`"summary":"Test ADF from file","customfield_10042":"*Bold text*\n\n"}}`
 	testServer := createTestServer{code: 201}
 	server := testServer.serve(t, expectedBody)
 	defer server.Close()
